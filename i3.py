@@ -146,6 +146,7 @@ class Socket(object):
             self.chunk_size = chunk_size
         if magic_string:
             self.magic_string = magic_string
+        self.data_fraction = None
         # Socket initialization and connection
         self.initialize()
         self.connect()
@@ -208,13 +209,21 @@ class Socket(object):
         successful. Returns None on failure.
         """
         try:
-            data = self.socket.recv(self.chunk_size)
+            if self.data_fraction:
+                data = self.data_fraction
+            else:
+                data = self.socket.recv(self.chunk_size)
             msg_magic, msg_length, msg_type = self.unpack_header(data)
             msg_size = self.struct_header_size + msg_length
             # Keep receiving data until the whole message gets through
             while len(data) < msg_size:
-                data += self.socket.recv(msg_length)
+                data += self.socket.recv(msg_size - len(data))
+            if data.count(b'{"change":') > 1:
+                pos = data.rfind(b'{"change":')
+                self.data_fraction = data[pos - 14:]
+                return None
             data = self.buffer + data
+            self.data_fraction = None
             return self.unpack(data)
         except socket.timeout:
             return None

@@ -1,3 +1,8 @@
+i3-py
+=====
+
+This is a fork of ziberna's i3-py. It fixes a crash on too fast workspace-switching.
+
 What is i3?
 -----------
 
@@ -15,9 +20,9 @@ I'll be refering to i3 as _i3-wm_ from here on.
 Install
 -------
 
-    pip install i3-py
-    # OR/AND (for Python 2.x)
-    pip2 install i3-py
+    git clone https://github.com/coddra/i3-py
+    cd ./i3-py
+    pip install .
 
 
 Run examples
