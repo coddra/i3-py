@@ -209,10 +209,11 @@ class Socket(object):
         successful. Returns None on failure.
         """
         try:
-            if self.data_fraction:
-                data = self.data_fraction
-            else:
-                data = self.socket.recv(self.chunk_size)
+            data = self.data_fraction if self.data_fraction else b''
+            data += self.socket.recv(self.chunk_size)
+            if len(data) < 14:
+                self.data_fraction = data
+                return None
             msg_magic, msg_length, msg_type = self.unpack_header(data)
             msg_size = self.struct_header_size + msg_length
             # Keep receiving data until the whole message gets through
